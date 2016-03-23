@@ -1,0 +1,17 @@
+
+
+
+Solving the maze.
+
+
+Takes in: ./solver or ./solver_full, followed by
+ < maze_file > < path_output_file > <x start> <y start> <x goal> <y goal>
+
+Places the output path for baby DJ to crawl into the path_output_file specified.
+
+This program utilizes Depth First Search to navigate through a maze and find two paths, one specifying the FULL path (every node reached in order to get to the destination), the other specifying the PRUNED path (simply how to get from start to finish). 
+
+The file utilizes two global variables: x_goal and y_goal, to keep track of the goal coordinates as specified in the command line call. It also uses a linked list structure to maintain the path throughout the program, and a double array of rooms to keep track of all room information previously contained in the < maze_file> .
+
+
+Other then that. It is a relatively standard path generating depth first search. 

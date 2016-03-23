@@ -1,0 +1,10 @@
+Mason DiMarco (mdimarco)
+
+Transpose:
+
+I have done standard blocking of B=64 (because it has been established that the matrix transpose will be working on will have dimensions divisible by 64). This speeds up the function considerably by utilizing the processor's ability to put a block into cache before transpose is even executed, allowing which is also more pipeline friendly. (yay intel!).
+
+Smooth:
+
+I've implemented a few more optimazations in this one. First, I've changed max and min from function calls to macros, which means they will simply be translated as ternery expressions rather than get called and have to set up the stack everytime we need a max or a min. I've also implemented blocking of B=16, this was relatively negligible, however, given there were still unknowns for the compiler due to the MAX and MIN macros, and the two inner inner loops. I also took the entire average function and moved that into the smooth function, further speeding it up to avoid having to move the frame pointers and do the call and ret commands.
+

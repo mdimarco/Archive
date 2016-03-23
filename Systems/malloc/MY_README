@@ -1,0 +1,49 @@
+
+
+
+The macro's for my file, as well as my many inline helper functions, are located in mm.h. I have defined my free-block to be 
+
+
+typedef struct block {
+    size_t size;
+    struct block *next;
+    struct block *prev;
+    size_t end_size;
+}block_t;
+
+where next/prev are the blocks neighbors on the free list. End size is included as a small padding to get the block size as an even multiple, and my implementation keeps a block at the lo point of the heap at ALL times. This is to ensure that there is always a block to point to as the head of the free list without having to use a global variable.
+
+
+Malloc will take in the size of the payload and:
+
+	1. if size is zero
+		return due to this being a trivial case
+	2. align/bump up size to a minimum as defined in mm.c
+	3. try to find a block of matching size in the free list
+			-uses first-fit rule for finding a block
+	4. If it finds it
+		-call break_free_block, which shaves off extra un-needed memory from the block and tries to form a new free block out of the remainder
+
+	5. Otherwise
+		-call mem_sbrk to increase the heap and allocate the new block
+	6. return the beginning pointer to the payload of the allocated block
+
+	*an allocated block's size is odd, and a free'd block's size is even
+
+
+Free will take in the pointer to a payload and assume it is
+an allocated block then:
+
+	1. move the pointer back to the beginning of this block
+	2. deallocate it (making the size even)
+	3. add it back into the free list (at the beginning)
+	4. call coalesce
+
+
+Coalesce will take in a block and check it's previous and next neighbors by memory, utilizing these block's end-tags to jump from their end to their beginning. If it finds a match, it will call the merge with next or merge with prev helper functions to push these blocks together, and will continue to do so until it can no longer be done. 
+
+Heap checker is relatively boring, it simply prints the list of blocks across the heap marked as Head Free or Aloc and their respective sizes. 
+
+I found that code readability helped far more than error checking in this exercise, which is why mine is a bit sparse for it. 
+
+

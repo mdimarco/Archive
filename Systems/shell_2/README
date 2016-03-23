@@ -1,0 +1,45 @@
+Partition of Stuff
+
+
+Stringlib.h & Stringlib.c - 
+	contains all of my string parsing,
+	tokenizing, removing tokens,
+	and trimming spaces
+
+	Standard set up from lab
+
+
+SysCallHandling.h & bSysStuff.c -
+	handles the input of "rm, cd, ln, and exit"
+	will be called by handle_system_call
+	which takes in the split args, and returns 
+	a 1 if "cd/rm/ln/exit" are called, or 0 otherwise
+
+
+wrappers.c
+	Holds both of my wrappers for read
+	and write
+
+
+sh.c
+	Main  does prompt creation, reading, and passes off
+		system calls and the child process, as well as
+		cleans the buffer ands argsv
+
+	child_proc handles the actual system call, passes off 
+		redirect information, and uses execv, then waits
+		for child process to end before returning
+	
+	check_redir takes in the arguments, passes off  check 
+		to see if there are multiple > and >> or < to
+		check_for_mult_redir, then goes through argsv,
+		looking for ">", ">>", ">", changing the file
+		descriptions as needed, and removing these 
+		tokens from argsv. Separate 'if's' for ">"
+		and ">>" used for verbosity and due to differing
+		open flags.
+
+	reap_children will take in and return nothing and will
+		iterate through the jobs list, updating and 
+		removing jobs as needed should they have been
+		affected by a signal.

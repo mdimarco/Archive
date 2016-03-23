@@ -1,0 +1,45 @@
+
+
+
+Mason DiMarco 
+mdimarco@cs.brown.edu
+
+The one, the only, the maze generator
+
+
+My program has been constructed under a few premises. The first of this 
+is that directions can be defined by a macro assigning NORTH EAST SOUTH and WEST
+to 0,1,2,3, and that the "Room" struct will contain the following values.
+
+	Room
+		1. a row and col coordinate pair
+		2. up/down/left/right chars (that will be 0's or 1's for wall - opening)
+		3. corresponding boolean connections to see if a wall or opening has been made
+			in that direction yet
+		4. a bool of whether or not the room has yet been visited
+
+
+I have several helper function to break down this task, all of which are defined at the top of the file, and has defined the macros ROW and COLUMN for the size of the maze. 
+
+Underneath the function headers and right before the main function, I have defined a global variable "rooms", which is a double array of struct Room. This variable will frequently be referred to by interior functions.
+
+I have grouped the functions together in their header definitions to try and put some similarities between them to be easier to see. The groups are as followed. 
+
+
+	1. initialize_room/create_matrix/calc_border_value 
+		These functions are used to initialize the rooms variable and serialize it to file
+
+	2. shuffle_array/drunken_walk 
+		These are the actual algorithmic intensive functions that I have tried
+		to map out as pseudo-code-esque as possible. Drunken walk especially uses quite a few helper functions
+
+	3. calc_new/opposite coords
+		These two are in charge of getting me the new 
+		coordinates at each step. The opposite function essentially get's the step that you just "came from" from the new room's perspective
+
+	4. create_connection/make_wall/opening  ...  /get_direction/has_connection
+		These do the actual heavy lifting when it comes to creating connections and altering the room's internal data. A problem with poor connections/stack overflowing may possibly be due to incorrect implementation or calling of these functions
+
+	5. out_of_bounds / testing
+		out_of_bounds is pretty self explanatory, the testing functions I have placed in internally and can be called by one major function names "test_functions()"
+

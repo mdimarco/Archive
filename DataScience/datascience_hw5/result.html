@@ -1,0 +1,55 @@
+<html>
+
+<head>
+    <link rel="stylesheet" href="http://netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assignment 5: Page Rank</title>
+</head>
+
+<body>
+
+    <div class="row">
+        <div class="col-md-2"></div>
+        <div class="col-md-8">
+            <div class="page-header center">
+                <h1>Assignment 5 <small>Page Rank</small></h1>
+            </div>
+
+            <!--  
+            <h2></h2>
+			<p>
+			</p>
+			-->
+            <h2> Implementation </h2>
+            <p>My implementation closely follows the pseudocode, adding in the dampening factor on top of it. While I gain a significant change per loop (alpha > epsilon), I go through each node in the pages, and for each of it's links, I update a list of the current node's page rank divided by the number of pages it links to. I use said list to calculate each node's new page rank, combining that value with a teleportation constant calculated before, to account for random page transitions.  </p>
+ 
+
+            <h2> Results </h2>
+            <p>  I've run both an optimized and unoptimized version of the pagerank algorithm, and here are my results:   </p>
+            <ul>
+            <li>
+            (Optimized) Time taken: 1550 seconds.    
+            </li>
+            <li>
+            (Unoptimized) Time taken: 1900 seconds.
+            </li>
+            <li>
+            Pages: [(5302153, 0.002239666220431793), (84707, 0.0014269970249514929), (88822, 0.001378121758783966)]
+            </li>
+            </ul>
+
+            <h2> Optimizations </h2>
+            <ol>
+                <li> Precalculated the number of nodes (num_nodes) and the teleportation probability (pr_teleport) outside of the main while loop</li>
+                <li> In the first loop inside the while loop (updating the new pageranks), I've removed calculations from the inner loop, as can be seen with node_inc and updating the c value, so that the only thing I have to do in the inner loop is update the page-rank itself.</li>
+                <li> I've actually noticed a speedup from changing the innermost for-loop from a i in range... to a for each loop (possibly because the program is pre-fetching the rest of the list into cache)</li>
+                <li> Changed numbers to floating points, so that python has less to worry about with type-conversions</li>
+                <li>By running this with pypy, I get an extraordinary speedup. (from 2-3x) the just in time compilation and memory saving optimizations seem to be quite effective for pagerank </li>
+            </ol>
+
+
+        <div class="col-md-2"></div>
+    </div>
+
+</body>
+</html>

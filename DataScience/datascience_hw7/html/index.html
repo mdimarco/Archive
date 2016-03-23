@@ -1,0 +1,334 @@
+<html>
+
+<head>
+    <link rel="stylesheet" href="http://netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assignment 5: MapReduce</title>
+    <link rel="stylesheet" href="http://cdn.jsdelivr.net/highlight.js/8.5/styles/default.min.css"> 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.5/highlight.min.js"></script>    
+    <script>hljs.initHighlightingOnLoad();</script>
+
+    <style>
+    .hljs{
+          word-wrap: normal;
+          white-space: pre;
+      }
+
+    .inout{
+        margin: 10px 0;
+    }
+
+    .merp{
+        margin-bottom: 100px;
+    }
+
+    </style>
+</head>
+
+<body>
+
+    <div class="row">
+        <div class="col-md-2"></div>
+        <div class="merp col-md-8">
+            <div class="page-header center">
+                <h1>Assignment 5 <small>MapReduce</small></h1>
+            </div>
+
+
+            <div id="implementation">
+                <h2>Introduction</h2>
+                <p> Have you ever wondered how recommendations are made? If anyone is actually paying attention to your reviews? How Amazon, Netflix, and Twitter <i>really</i> know about your preferences? In this writeup, I will describe my implementation of such systems and take on all three of those questions!
+                </p>
+
+                <p> A major problem in identifying preferences is one of wrangling the data you have taken in. How can you change simple combinations of a user, their rating, and a movie to be something meaningful? It's not terribly difficult to create a system that records user rating's, but to actually classify classify similar movies with such data requires a good deal of clever reasoning.
+                </p>
+
+                <p>A prior note: knowledge of python's <a href="http://stackoverflow.com/questions/231767/what-does-the-yield-keyword-do-in-python"> yield </a> keyword is very helpful to know.
+                </p>
+
+
+                <h2>Implementation</h2>
+
+                <p> The format I have used in this project transforms information on movies and user's who rated said movies into a reccomendation system through a 6 step <a href="http://hadoop.apache.org/docs/r1.2.1/mapred_tutorial.html">map reduce</a> program, run through python's <a href="https://pythonhosted.org/mrjob/">mrjob</a> library to work on an AWS EMR cluster, allowing distribution across several machines. The first step of this process simply maps the format of "movies.dat" and "ratings.dat" (found in the data/recommendations folder) to the format of: (movie_title,rating). The next 5 (reducer) steps are detailed as follows: 
+                </p>
+
+
+                <ol>
+                   <li>
+                   <div class="inout">
+                   <b>Input</b>: key = movie_id, value = [ either (user_id,rating) or movie_title ]
+                   </div>
+                   <div class="inout">
+                   <b>Output</b>: key = movie_title, value = (user_id,rating) 
+                   </div>
+                   </li>
+                   <pre><code class="python">
+    def reducer_0(self, key, values):
+        movie_title = ""
+        ratings = []
+        for value in values:
+            if len(value) == 1:
+                movie_title = value[0]
+            else:
+                ratings.append((value[0],value[1]))
+        for rating in ratings:
+            yield movie_title,rating
+                   </code></pre>
+
+                   <li>
+                   
+                   <div class="inout">
+                   Now We will Take our movie_title and ratings and get a <b>count</b> of our number of raters for a given movie title
+                   </div>
+                   
+                   <div class="inout">
+                   <b>Input</b>: key=movie_title value=[(user_id,rating)]
+                   </div>
+                   <div class="inout">
+                   <b>Output</b>: key=user_id value=(movie_title,rating,total_ratings_for_this_movie)
+                   </div>
+
+                   <pre><code class="python">
+    def reducer_1(self, key, values):   
+        user_dict = {}
+        count = 0
+        for value in values:
+            count+=1
+            user_dict[value[0]] = value[1]
+
+        for user,rating in user_dict.items():
+            yield user,(key,rating,count)
+                   </code></pre>
+                   </li>
+                   <li>
+                   <p>Awesome! Now all of this is pretty standard, but here is something new you may not have come across yet. Combinations! Built right out of the itertools package of python, we will be taking these user ratings and mixing/matching all combinations of them so that we can begin to compare movies ratings! (this is also where the process begins taking longer and the data gets larger)
+                   </p>
+                   <br>
+                   <div class="inout">
+                   <b>Input</b> key=user_id value=[(movie_title,rating,total_ratings_for_this_movie)]
+                   </div>
+                   <div class="inout">
+                   <b>Output</b> key=(movie_title1,movie_title2) value=(rating1,rating2,numraters1,numraters2)
+                   </div>
+                   <pre><code class="python">
+    def reducer_2(self, key, values):
+        titles = []
+        movie_dict = {}
+
+        for value in values:
+            titles.append(value[0])
+            movie_dict[value[0]] = (value[1],value[2])
+
+        for comb in combinations(titles,2):
+            m1 = comb[0]
+            m2 = comb[1]
+            r1,n1 = movie_dict[m1]
+            r2,n2 = movie_dict[m2]
+            yield (m1,m2),(r1,r2,n1,n2)
+                    </code></pre>
+                   </li>
+
+
+                    <li>
+                    <p>We're getting closer! Now comes the interesting part. Running correlations! There are tons of different ways to correlate these ratings and come up with all kinds of interesting solutions, and I encourage you to explore each of the ones provided here and experiment on your own. For this program, however, we will focus on a few correlation techniques. <br><br> In the below equations, (Shamelessly copied from the assignment this is based off of, credit: <a href="http://cs.brown.edu/courses/csci1951-a/assignments/assignment7/">Brown CS1951A</a>) n is the number of users who rated both movie X and movie Y. n1 is the number of users who rated movie X. n2 is the number of users who rated movie Y
+                    </p>
+                    <img src="corr_algs.png" class="img-responsive" alt="Responsive image">
+                    Feel free to copy these for your program
+
+    <pre><code>
+    def correlation(n, sum_x, sum_y, sum_xx, sum_yy, sum_xy):
+        # http://en.wikipedia.org/wiki/Correlation_and_dependence
+        numerator = n * sum_xy - sum_x * sum_y
+        denominator = math.sqrt(n * sum_xx - sum_x * sum_x) 
+                      * math.sqrt(n * sum_yy - sum_y * sum_y)
+        if denominator == 0:
+            return 0.0
+        return numerator / denominator
+
+    def regularized_correlation(n, sum_x, sum_y, sum_xx, 
+        sum_yy, sum_xy, virtual_count, prior_correlation):
+
+        unregularized_correlation_value = correlation(n, sum_x, sum_y, sum_xx, sum_yy, sum_xy)
+        weight = n / (n + virtual_count)
+        return weight * unregularized_correlation_value + (1 - weight) * prior_correlation
+
+    def cosine_similarity(sum_xx, sum_yy, sum_xy):
+        # http://en.wikipedia.org/wiki/Cosine_similarity
+        numerator = sum_xy
+        denominator = (math.sqrt(sum_xx) * math.sqrt(sum_yy))
+        if denominator == 0:
+            return 0.0
+        return numerator / denominator
+
+    def jaccard_similarity(n_common, n1, n2):
+        # http://en.wikipedia.org/wiki/Jaccard_index
+        numerator = n_common
+        denominator = n1 + n2 - n_common
+        if denominator == 0:
+            return 0.0
+        return numerator / denominator
+            </code></pre>
+
+            The next reducer will now compute these above statistics on our movie-ratings set:
+            <div class="inout">
+            <b>Input</b>: Key=(movie_title1,movie_title2) Value= [(rating1,rating2,num_raters1,num_raters2)]
+            </div>
+            <div class="inout">
+            <b>Output</b>: Key=(move_title1) Value=(movie_title2, correlation_value, regularized_correlation_value, cosine_similarity_value, jaccard_similarity_value, n, n1, n2)
+            </div>
+            <b>Note:</b>To maintain significance, ignore movie pairs who's regularized correlation value < 0.5
+            <pre><code>
+    def reducer_3(self, key, values):
+        x,y = 0,0
+        count = 0
+        sumxx,sumxy,sumyy = 0,0,0
+        for v in values:
+            x += v[0]
+            y += v[1]
+            n1 = v[2]
+            n2 = v[3]
+            sumxx += v[0]*v[0]
+            sumyy += v[1]*v[1]
+            sumxy += v[0]*v[1]
+            count +=1
+        reg_corr = regularized_correlation(count,x,y,sumxx,sumyy,sumxy,10,0.0)
+        if reg_corr >= 0.5:
+            corr_val = correlation(count,x,y,sumxx,sumyy,sumxy)
+            cosin_val = cosine_similarity(sumxx,sumyy,sumxy)
+            jacc_dist = jaccard_similarity(count,n1,n2)
+            yield key[0],(key[1],corr_val,reg_corr,cosin_val,jacc_dist,count,n1,n2)
+
+            </code></pre>
+                </li>
+
+            <li>
+            <div class="inout">
+            Almost There! Now all we have to do is sort the data in 1 more reducer step.
+            </div>
+            <div class="inout">
+            <b>Input</b>: Key=movie_title1 Value=[(movie_title2, correlation_value, regularized_correlation_value, cosine_similarity_value, jaccard_similarity_value, n, n1, n2)]
+            </div>
+            <div class="inout">
+            <b>Output</b>: Key=(movie_title1, movie_title2) Value=(correlation_value, regularized_correlation_value, cosine_similarity_value, jaccard_similarity_value, n, n1, n2)
+            </div>
+
+            <pre><code>
+                
+    def reducer_4(self, key, values):
+        for val in sorted(values,key=lambda x: x[2],reverse=True):
+            yield (key,val[0]),val[1:]
+
+            </code></pre>
+            </li>
+            </ol>
+        </div>
+
+        <div id="analysis">
+        <h2>Analysis <small> of part 4</small></h2>
+
+
+        <p>Success! Now that we have our answers and correlations, Let's take a look at the results</p>
+        Personally, seeing these:
+
+        <pre><code>
+
+
+    ["2 Fast 2 Furious (2003)", "Fast & Furious (2009)"]
+
+    ["The Lord of the Rings: The Fellowship of the Ring (2001)", "The Lord of the Rings: The Return of the King (2003)"]  
+    ["The Lord of the Rings: The Return of the King (2003)", "The Lord of the Rings: The Two Towers (2002)"]
+    ["The Lord of the Rings: The Fellowship of the Ring (2001)", "The Lord of the Rings: The Two Towers (2002)"] 
+
+        
+        </code></pre>
+        <p>All in the same grouping and as some of the top recommendations gives me hope in this method for clustering recommendations. I couldn't think of a better obvious recommendation for a movie than it's sequel/prequel (unless it's Star Wars). 
+        </p>
+        </div>
+
+        <p>
+        Of course we didn't create the other similarity metrics for nothing, let's see how the other techniques for correlation perform. First, an easy one to switch to is the <a href="http://en.wikipedia.org/wiki/Jaccard_index">Jaccard Distance</a>, this seems to yield dissapointing results, as the results I received from this were skewed by how many/few reviews a movie got. Jaccard also fails to account for the actual <i>rating</i> of the movies, so it makes sense that this would be a weaker indicator.
+        </p>
+        <p>
+        Next I tried cosine similarity. Now I had higher hopes for this, as it actually takes into account the ratings <i>between</i> the two movies, and as would be expected, I received very similar results.
+        </p>
+
+        <p>
+        Another metric I would be interested in trying is weighting the ratings by the amount of ratings each rater has submitted to see if correlations can be found there. There may be a distinction in someone who loved/hated a movie so much they felt the need to rate it, even if they had barely rated any other movies, as opposed to someone who frequently watches/rates movies. This may provide an interesting distinction that is seen between what professional film critics think of movies and how the general public feels about them.
+        </p>
+
+        <h2>Analysis <small> of part 5</small></h2>
+        <p>My first thought for "people you may know" functionality, is thinking of social connections (friends/follows) as a graph, in this scenario, we could take people A,B, and C where:
+            <ol>
+                <li> A,B, and C are friends</li>
+                <li> A,B are part of a densely packed graph, where they are friends with people who are mostly friends with each other, but that C is not friends with</li>
+            </ol> 
+        <p>It is in this scenario that it's possible "A" and "B" are in a clique that "C" may be part of (or may have just joined), so if C has two friends who are friends with each other, who in turn are part of a group of closely interconnected friends, said friends may be good candidates to reccomend connecting with "C". </p>
+
+        <p>Now for the algorithm, the paper <a href="https://cs.uwaterloo.ca/~ashraf/pubs/icde13maxclique.pdf">here</a> details the process of clique finding using MapReduce. If I was to <i>not</i> use prior work in the field, I would start with the following
+
+
+        <pre><code>
+        #Find friends of A who are friends with each other
+        seen = set({})
+        doubles = set({})
+        for friends in A.friends():
+            if friend in seen:
+                doubles.add(friend)
+            else:
+                seen.add(friend)
+
+        for B,C in doubles:
+            for mutual in intersect(B.friends(), C.friends()):
+                reccomend(mutual, A)
+        </code></pre>
+        <p>
+        This is obviously a watered down version of actual clique finding, but I think it would be a good place to start. In terms of map reduce, we have (   [{}] stands for a list of dicts )
+        </p>
+
+        <pre><code>
+        Map:
+            Input: _,[ {friend_of_A:friend_connections}, .... , ] 
+            Does: Groups every 2 friends of A and their connections
+            Outputs: All combinations of: key=(friend1,friend2),val=([friend1_connections], [friend2_connections] )
+
+        Reduce1:
+            Input: Single key,val from above ^
+            Does: Takes intersection of friend1,friend2 s connections
+                  If friend1 and friend2 are connected
+                    for each mutual friend of the two
+                        Output = mutual,1
+                  Else
+                    No Output
+        Reduce2:
+            Input: potential_recomendee,[1,1,1,....,1]
+            Does: Counts appearances of reccomendee
+            Output: potential_recomendee,count
+        </code>    </pre>
+
+        <b>Result</b>: Reccomendations for A, sortable by frequency of appearance in mutual friend's friends
+
+
+        <h2> Additional </h2>
+        For good measure, the results of running the big recommendation job
+
+
+        <pre><code>
+
+["Armed and Dangerous (1986)", "Jingle All the Way (1996)"] [0.76487207889857822, 0.53309266105052422, 0.96878814567170213, 0.069908814589665649, 23, 130, 222]
+["Beach Party (1963)", "Bikini Beach (1964)"]   [0.9642520844283694, 0.52595568241547419, 0.99471672264711486, 0.16216216216216217, 12, 47, 39]
+["Broadcast News (1987)", "All the King's Men (1949)"]  [0.69903724855425997, 0.55030591907463022, 0.98433001822221855, 0.042479908151549943, 37, 789, 119]
+["Broadcast News (1987)", "Even Cowgirls Get the Blues (1993)"] [0.76792527671856237, 0.50312345716043738, 0.95052747570699425, 0.022326674500587545, 19, 789, 81]
+["Carnosaur (1993)", "Carnosaur 2 (1995)"]  [0.91867080282114344, 0.50109316517516911, 0.96979042519265757, 0.13186813186813187, 12, 77, 26]
+["Coma (1978)", "Heat (1995)"]  [0.73984351119181391, 0.53433142474964335, 0.98337834378888311, 0.024574669187145556, 26, 144, 940]
+</code></pre>
+
+        </div>
+
+
+
+
+        <div class="col-md-2"></div>
+    </div>
+
+</body>
+</html>

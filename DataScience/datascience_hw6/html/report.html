@@ -1,0 +1,353 @@
+<html>
+
+<head>
+    <link rel="stylesheet" href="http://netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assignment 6: Twitter Sentiment Classification</title>
+</head>
+
+<style>
+
+    ol li{
+        font-size: 16px;
+    }
+
+    li{
+        margin-top: 4px;
+    }
+
+    #todo{
+        font-size: 35px;
+    }
+
+    .end{
+        margin-bottom: 30px;
+    }
+
+    .beg{
+        margin-top: 30px;
+    }
+
+    img{
+        margin-bottom: 4px;
+    }
+
+    .marleft{
+        display: inline-block;
+        width: 10em;
+        float: left;
+    }
+
+
+</style>
+
+
+<body>
+
+    <div class="row">
+        <div class="col-sm-2"></div>
+        <div class="col-sm-8">
+            <div class="page-header center">
+                <h1>Assignment 6 <small>Twitter Sentiment Classification</small></h1>
+            </div>
+
+            <ol>
+                
+            <li>Tweet Processing Steps (A  basic test of my tokenizer is found in tokenizer_test.py)
+                <ul>
+                <li>
+                    Turn all of the tweets to lower case
+                </li>
+                    
+                <li>
+                    Turn All @usernames into ANY_USER
+                </li>
+                <li>
+                    Remove all #'s
+                </li>
+                <li>
+                    www. , https://, http:// changed to URL
+                </li>
+                <li>
+                    All words not beginning with an alphabetic character removed
+                </li>
+                <li>
+                    All stop words removed
+                </li>
+                <li>
+                    Words stemmed by Porter's algorithm
+                </li>
+                <li>
+                    Multiple in a row letters removed : baaaaadddddd -> baadd
+                </li>
+                </ul>
+            </li>
+
+
+            <li>
+                For simplicities sake, I used the unigram model, meaning my feature space is all of the (unique) words that have been stated (which have been cleaned by the tweet processing), had I used the bigram model, it would be a combination of every two unique words. This would have been more effective as it captures more than the unigram does; for example, the statement "not happy" would might be classified as positive in a unigram model, but more likely will not be seen as positive in a bigram model
+            </li>
+            <li>
+                N/A
+            </li>
+
+            <li>
+                Results:
+
+                <!-- SVM -->
+
+                <div> <h2><b>Support Vector Machine </b></h2></div>
+                <div> Training Accuracy: <b>0.8926</b> </div>
+                <div> Cross Validation Scores Calculated </div>
+                <div> [ 0.73225   0.734625  0.710625  
+                  0.7345    0.72535  0.7225    0.7348
+                  0.73975   0.73087  0.7265  ] </div>
+                <div> Cross Validation Accuracy: <b>0.73</b> (+/- 0.01) </div>
+                
+                <div> Test Accuracy: <b>0.763</b> </div>
+                <div> Classification report </div>
+                <table class="table">
+                <th>    <td> precision</td> <td>recall</td>  <td>f1-score</td>   <td>support</td> </th>
+                <tr>   <td>   0</td>       <td>0.77</td>  <td>0.73</td> <td>0.75</td>  <td>177</td>
+                <tr>   <td>   1</td>       <td>0.75</td>  <td>0.79</td> <td>0.77</td>  <td>182</td>
+                <tr> <td>avg / total</td>  <td>0.76</td>  <td>0.76</td> <td>0.76</td>  <td>359</td>
+
+                </table>
+
+                <div>Confusion Matrix</div>
+                <div>[130  47]</div>
+                <div class="end">[ 38 144]</div>
+
+                <!-- Log stuff  -->
+
+                <div><h2><b>Log</b></h2></div>
+                <div>Training Accuracy: <b>0.84405</b></div>
+                <div>Cross Validation Scores Calculated</div>
+                <div>[ 0.75375   0.75725   0.730375  
+                  0.75      0.74925   0.739375  0.753625
+                  0.7565    0.75125   0.74    ]</div>
+                <div>Cross Validation Accuracy: <b>0.75</b> (+/- 0.01)</div>
+
+                <div>Test Accuracy: <b>0.788</b></div>
+                <div>Classification report</div>
+                <table class="table">
+                <th>         <td>precision</td>    <td>recall</td>  <td>f1-score</td>   <td>support</td></th>
+                <tr>      <td>0</td>      <td> 0.80</td>  <td>0.76</td>  <td>0.78</td>   <td>177</td></tr>
+                <tr>      <td>1</td>       <td>0.78</td>  <td>0.81</td>  <td>0.80</td>   <td>182</td></tr>
+
+                <tr><td>avg / total</td>   <td>0.79</td>  <td>0.79</td>  <td>0.79</td>   <td>359</td></tr>
+                </table>
+
+                <div>Confusion Matrix</div>
+                <div>[135  42]</div>
+                <div class="end">[ 34 148]</div>
+
+
+                <!-- Naive Bayes -->
+
+                <div><h2><b>Naive Bayes</b></h2></div>
+                <div>Training Accuracy: <b>0.826</b></div>
+                <div>Cross Validation Scores Calculated</div>
+                <div>[ 0.746     0.747     0.7278  0.7378  0.73825   0.734  0.75175
+                  0.743  0.743  0.736]</div>
+                <div>Cross Validation Accuracy: <b>0.74</b> (+/- 0.01)</div>
+
+                <div>Test Accuracy: <b>0.785</b></div>
+                <div>Classification report</div>
+                <table class="table">
+                <th>        <td>precision</td>    <td>recall</td>  <td>f1-score</td>   <td>support</td>         </th>
+
+                <tr>          <td>0 </td>      <td>0.77 </td>     <td>0.81 </td>     <td>0.79 </td>      <td>177</td>    </tr>
+                <tr>          <td>1 </td>      <td>0.80 </td>     <td>0.76 </td>     <td>0.78 </td>      <td>182</td>    </tr>
+
+                <tr> <td>avg / total </td>      <td>0.79  </td>    <td>0.79 </td>     <td>0.79  </td>     <td>359 </td>   </tr>
+
+
+                </table>
+                <div>Confusion Matrix</div>
+                <div>[143  34]</div>
+                <div class="end">[ 43 139]</div>
+
+
+                <p>Looks to me like Logistic regression and Naive Bayes work better overall than SVM, SVM works better on the training data itself, however, so possibly overfits the easiest? </p>
+
+            </li>
+
+            <li>
+            Please see writeup_5.py for the code used to produce the following graphs:
+            <img src="cval.png" class="img-responsive">
+            <img src="trtes.png" class="img-responsive">
+            Looks like SVM overfits the most!
+
+            </li>
+
+            <li> Terminology
+                <ul>
+                <li>
+                <b><u> Precision: </u> </b> The fraction of tweets marked as positive out of all of the ones our classifier deemed positive. 
+                </li>
+
+                <li>
+                <b><u> Recall: </u> </b> The fraction of positive tweets we retrieved out of all of the positive tweets
+                </li>
+
+
+                <li>
+                <b><u> F1-Score: </u> </b> A good measure of test accuracy taking into account the harmonic mean of precision and recall (defined above)
+                </li>
+
+
+                <li>
+                <b><u> True Positive: </u> </b> Tweets marked positive that were positive
+                </li>
+
+                <li>
+                <b><u> False Positive: </u> </b> Tweets marked positive that were negative
+                </li>
+
+                <li>
+                <b><u> True Negative: </u> </b> Tweets marked negative that were negative
+                </li>
+
+                <li>
+                <b><u> False Negative: </u> </b> Tweets marked negative that were positive
+                </li>
+
+
+                </ul>
+
+            </li>
+
+
+            <li>
+
+            <h3>Log</h3> <img src="log_roc.png" class="img-responsive"> 
+            <br>
+            <h3>NB</h3> <img src="nb_roc.png" class="img-responsive">
+            <br>
+            It looks like these classifiers aren't doing a bad job! With an area of .87-.88 and a very high initial slope we can see a strong true positive rate without making too many false assumptions.
+            </li>
+
+
+            <li>
+
+                    <div class="beg">SVM</div>
+
+                        <div class="marleft">-2.1600 sauna         </div> <div>2.4080  petunia</div>
+                        <div class="marleft">-2.1216 shawneda      </div> <div>2.3828  brutu</div>
+                        <div class="marleft">-1.9861 samptc        </div> <div>2.1904  ooff</div>
+                        <div class="marleft">-1.9705 phn           </div> <div>2.0940  hartsfield</div>
+                        <div class="marleft">-1.9370 robb          </div> <div>2.0444  feelsl</div>
+                        <div class="marleft">-1.9288 gaultier      </div> <div>2.0266  bch</div>
+                        <div class="marleft">-1.9131 morningwish   </div> <div>2.0060  sleepingi</div>
+                        <div class="marleft">-1.8720 slowin        </div> <div>1.9821  meiv</div>
+                        <div class="marleft">-1.8448 canr          </div> <div>1.9696  memusta</div>
+                        <div class="marleft">-1.8235 restur        </div> <div>1.9652  httptwitpiccom7j6vw</div>
+                        <div class="marleft">-1.7762 prevail       </div> <div>1.9560  yass</div>
+                        <div class="marleft">-1.7318 ploblem       </div> <div>1.9383  prone</div>
+                        <div class="marleft">-1.6812 obox          </div> <div>1.9288  omelett</div>
+                        <div class="marleft">-1.6505 spywar        </div> <div>1.9148  tcb</div>
+                        <div class="marleft">-1.6452 todayr        </div> <div>1.9015  meryl</div>
+                        <div class="marleft">-1.6226 gisburn       </div> <div>1.8909  contrari</div>
+                        <div class="marleft">-1.6185 beso          </div> <div>1.8672  colada</div>
+                        <div class="marleft">-1.6062 morningthat   </div> <div>1.8578  wifequot</div>
+                        <div class="marleft">-1.5974 outske        </div> <div>1.8567  domi</div>
+                        <div class="marleft">-1.5968 nit           </div> <div>1.8412  meter</div>
+
+
+                    <div class="beg">Log</div>
+
+                        <div class="marleft">-3.1236 sad                 </div><div>2.1720  welcom</div>
+                        <div class="marleft">-2.8627 cancel              </div><div>2.0922  proud</div>
+                        <div class="marleft">-2.5724 bummer              </div><div>2.0243  smile</div>
+                        <div class="marleft">-2.5332 lone                </div><div>1.9182  congratul</div>
+                        <div class="marleft">-2.4820 disappoint          </div><div>1.8994  yayyi</div>
+                        <div class="marleft">-2.4675 unfortun            </div><div>1.8991  ahaha</div>
+                        <div class="marleft">-2.4431 sadli               </div><div>1.8655  tyler</div>
+                        <div class="marleft">-2.4420 depress             </div><div>1.7891  vision</div>
+                        <div class="marleft">-2.3882 upset               </div><div>1.7742  heheh</div>
+                        <div class="marleft">-2.2567 bum                 </div><div>1.7735  vip</div>
+                        <div class="marleft">-2.1839 dissapoint          </div><div>1.7615  nightt</div>
+                        <div class="marleft">-2.1820 fml                 </div><div>1.7581  congrat</div>
+                        <div class="marleft">-2.0785 stink               </div><div>1.7561  yaai</div>
+                        <div class="marleft">-2.0734 miss                </div><div>1.7186  highlight</div>
+                        <div class="marleft">-2.0624 sick                </div><div>1.7138  chillin</div>
+                        <div class="marleft">-2.0224 hurt                </div><div>1.6716  thank</div>
+                        <div class="marleft">-2.0218 headach             </div><div>1.6523  howdi</div>
+                        <div class="marleft">-2.0078 afford              </div><div>1.6480  happili</div>
+                        <div class="marleft">-1.9825 cry                 </div><div>1.6351  funn</div>
+                        <div class="marleft">-1.9616 crappi              </div><div>1.6280  liber</div>
+
+
+                    <div class="beg">NB</div>
+
+                    <div class="marleft">-28.0112    farrah              </div><div>38.0000 wwtweeteraddercom</div>
+                    <div class="marleft">-20.0000    itchi               </div><div>37.0000 wwtweeterfollowcom</div>
+                    <div class="marleft">-17.9856    fawcett             </div><div>14.6667 vip</div>
+                    <div class="marleft">-17.5747    cancel              </div><div>12.1154 welcom</div>
+                    <div class="marleft">-16.5837    sad                 </div><div>12.0000 howdi</div>
+                    <div class="marleft">-16.1031    throat              </div><div>12.0000 zac</div>
+                    <div class="marleft">-16.0000    postpon             </div><div>11.8571 congratul</div>
+                    <div class="marleft">-16.0000    sob                 </div><div>11.5000 poem</div>
+                    <div class="marleft">-14.9925    homesick            </div><div>11.2500 followfridai</div>
+                    <div class="marleft">-14.9925    ouchi               </div><div>11.0000 fascin</div>
+                    <div class="marleft">-14.4509    upset               </div><div>11.0000 gem</div>
+                    <div class="marleft">-14.1044    depress             </div><div>11.0000 liber</div>
+                    <div class="marleft">-14.0056    bleed               </div><div>11.0000 melodi</div>
+                    <div class="marleft">-14.0056    boohoo              </div><div>10.0000 ciao</div>
+                    <div class="marleft">-13.3690    lone                </div><div>10.0000 ddai</div>
+                    <div class="marleft">-13.0039    heartbroken         </div><div>10.0000 hottest</div>
+                    <div class="marleft">-13.0039    poorli              </div><div>10.0000 lemonad</div>
+                    <div class="marleft">-13.0039    uggh                </div><div>10.0000 nightt</div>
+                    <div class="marleft">-12.6743    infect              </div><div>10.0000 congrat</div>
+                    <div class="marleft">-12.5000    sry                 </div><div>9.5000  yayi</div>
+
+            </li>
+
+
+            <li>
+            Log Wins! Looking at the most informative features for logistic regression it seems that it has created the best model for words that I personally would think to be correlated with negative tweets. It seems that svm has the problem of overfitting on the data, and could probably use a change in regularization. It then follows that this data probably fits a logistic function better than a linear one, simply due to the distribution of these positive/negative tweets.
+
+            </li>
+
+            <li>
+                <h2> Correctly Classified Tweets </h2>
+                <ul>
+                <li><b>1</b>, [ 0.00129194,  0.99870806], '@sklososky Thanks so much!!! ...from one of your *very* happy Kindle2 winners ; ) I was so surprised, fabulous. Thank you! Best, Kathleen'</li>
+                <li><b>1</b>, [ 0.0039471,  0.9960529], 'Obama is quite a good comedian! check out his dinner speech on CNN :) very funny jokes.'</li>
+                <li><b>1</b>, [ 0.00427558,  0.99572442], '@mashable I never did thank you for including me in your Top 100 Twitter Authors! You Rock! (&amp; I New Wave :-D) http://bit.ly/EOrFV'</li>
+                <li><b>1</b>, [ 0.00826365,  0.99173635], "Obama's got JOKES!! haha just got to watch a bit of his after dinner speech from last night... i'm in love with mr. president ;)"</li>
+                <li><b>1</b>, [ 0.01191183,  0.98808817], "Just picked up my new Canon 50D...it's beautiful!!  Prepare for some seriously awesome photography!"</li>
+                <li><b>0</b>, [  9.99595174e-01,   4.04825940e04]), "@springsingfiend @dvyers @sethdaggett @jlshack AT&amp;T dropped the ball and isn't supporting crap with the new iPhone 3.0... FAIL #att SUCKS!!!"</li>
+                <li><b>0</b>, [  9.99289090e-01,   7.10909856e04]), 'F*ck Time Warner Cable!!! You f*cking suck balls!!! I have a $700 HD tv &amp; my damn HD channels hardly ever come in. Bullshit!!'</li>
+                <li><b>0</b>, [ 0.99884744,  0.00115256], 'I hate Time Warner! Soooo wish I had Vios. Cant watch the fricken Mets game w/o buffering. I feel like im watching free internet porn.'</li>
+                <li><b>0</b>, [ 0.99883586,  0.00116414], 'THE DENTIST LIED! " U WON\'T FEEL ANY DISCOMORT! PROB WON\'T EVEN NEED PAIN PILLS" MAN U TWIPPIN THIS SHIT HURT!! HOW MANY PILLS CAN I TAKE!!'</li>
+                <li><b>0</b>, [ 0.9980507,  0.0019493], 'NOOOOOOO my DVR just died and I was only half way through the EA presser. Hate you Time Warner'</li>
+                </ul>
+
+
+                <h2>Incorrectly Classified Tweets</h2>
+
+                <ul>
+                <li>(Actual,Predicted, [neg prob, pos prob], text)</li>
+                <li><b>0</b>, <b>1</b>, [ 0.03938063,  0.96061937], 'Night at the Museum tonite instead of UP. :( oh well. that 4 yr old better enjoy it. LOL'</li>
+                <li><b>0</b>, <b>1</b>, [ 0.057647,  0.942353], "Back from seeing 'Star Trek' and 'Night at the Museum.' 'Star Trek' was amazing, but 'Night at the Museum' was; eh."</li>
+                <li><b>0</b>, <b>1</b>, [ 0.11125952,  0.88874048], 'Life?s a bitch? and so is Dick Cheney. #p2 #bipart #tlot #tcot #hhrs #GOP #DNC http://is.gd/DjyQ'</li>
+                <li><b>0</b>, <b>1</b>, [ 0.11315486,  0.88684514], 'US planning to resume the military tribunals at Guantanamo Bay... only this time those on trial will be AIG execs and Chrysler debt holders'</li>
+                <li><b>0</b>, <b>1</b>, [ 0.11966524,  0.88033476], 'Kobe is the best in the world not lebron .'</li>
+                <li><b>1</b>, <b>0</b>, [ 0.98478921,  0.01521079], 'My wrist still hurts. I have to get it looked at. I HATE the dr/dentist/scary places. :( Time to watch Eagle eye. If you want to join, txt!'</li>
+                <li><b>1</b>, <b>0</b>, [ 0.9670453,  0.0329547], 'My dad was in NY for a day, we ate at MESA grill last night and met Bobby Flay. So much fun, except I completely lost my voice today.'</li>
+                <li><b>1</b>, <b>0</b>, [ 0.95083291,  0.04916709], 'is studing math ;) tomorrow exam and dentist :)'</li>
+                <li><b>1</b>, <b>0</b>, [ 0.923315,  0.076685], 'omgg i ohhdee want mcdonalds damn i wonder if its open lol =]'</li>
+                <li><b>1</b>, <b>0</b>, [ 0.87932896,  0.12067104], "I'm ready to drop the pretenses, I am forever in love with jQuery, and I want to marry it. Sorry ladies, this nerd is jquery.spokenFor.js"</li>
+
+                </ul>
+            </li>
+
+            </ol>
+
+        <div class="col-sm-2"></div>
+    </div>
+
+</body>
+</html>

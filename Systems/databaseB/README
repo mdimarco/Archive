@@ -1,0 +1,47 @@
+
+
+README
+Mason DiMarco
+
+
+#################
+Client Threads List
+#################
+Represented as a Linked List datastructure with a head and tail pointer (as created in lab)
+
+
+
+#################
+Clutter
+#################
+Unfortunately the tester doesn't accept multiple files, so my linkedlist/signal handling necessary for server.c are all in server.c. Both the linked list and signal implementations were taken from my labs
+
+I canceled out some of the scaffolding commenting to maintain at least some brevity and reduce redundancy
+
+
+#################
+Error Handling Choices
+#################
+
+I chose a more conservative approach to exiting from error's, by not exiting if pthread_rwlock_init/destroy fail on dbnode, given that these should only be impactful of themselves, and will still show an appropriate error message.
+
+When it comes to locking/unlocking, I show no mercy and exit while I can, due to the plethora of errors that could occur from error's locking / unlocking and the possibilities of deadlocks from these.
+
+#################
+#################
+
+
+
+#################
+PTHREAD ERROR SAFETY CHECKING
+#################
+An errorsafe version of pthread functions are included in db.c and are defined in db.h. I would have made them wrapper functions, but a system defining the error safe version with a capital "P" seemed easier given the db tester constraint of no outside files.
+
+Capital "P" for pthread indicated my error-safe version
+#################
+#################
+
+
+
+
+No currently known bugs.

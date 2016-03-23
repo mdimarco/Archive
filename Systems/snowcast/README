@@ -1,0 +1,17 @@
+The following describes my attempt at receiving information from the snowcast
+server. 
+
+It begins by checking the arguements to make sure they are of the correct format.
+
+It then initiates the handshaking process, opening the tcp file descriptor with the "open_tcp_fd" function, sending the hello message with the "say_hello" function, and receiving the response with the "hear_welcome" function.
+
+It will then automatically set the station to station zero, and enter a select event loop.
+
+
+The loop will track 3 different readings:
+	1. Announcements from the server via tcp_fd (written to STDERR)
+	2. The stream of information via udp_fd (written to STDOUT)
+	3. Any information from stdin that must be handled. (E.g. setting station, quitting)
+
+A pseudo-wrapper around the "write" system call, named Write, was used to perform the write system call with error handling.
+

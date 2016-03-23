@@ -1,0 +1,12 @@
+mdimarco (Mason DiMarco) hw6
+
+
+Included in the classification folder is the file stop_words.txt, a stop words list collected from http://www.ranks.nl/stopwords used to eliminate stop words found in a tweet
+
+tokenizer_test.py: does a simple test to check out how the stemming/shortening/cleaning is working out
+
+KNOWN BUGS:
+	-None
+
+SPECIAL OPTIMIZATIONS:
+	-None

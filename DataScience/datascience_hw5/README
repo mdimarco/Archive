@@ -1,0 +1,12 @@
+
+Mason DiMarco (mdimarco)
+
+Standard Implementation of Page Rank
+	-result.html: Details of implementation/optimizations
+	-pageRank.py: Optimized implementation
+	-pageRank_unoptimized.py: Unoptimized implementation
+
+Known Bugs:
+	-None
+
+Benchmarks in optimized and unoptimized files included

