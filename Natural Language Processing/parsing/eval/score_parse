@@ -1,0 +1,16 @@
+#!/bin/bash
+
+gold=$1
+outp=$2
+rand=$(echo $RANDOM)
+tempgold=$rand.gold
+tempoutp=$rand.outp
+
+cp $gold $tempgold
+sed '/*IGNORE*/d' $outp > $tempoutp
+which=$( grep -n "*IGNORE*" $outp | sed 's/:/d/' | grep -o "[[:digit:]]*d" )
+sed -i "{$which}" $tempgold
+
+evalb -p /course/cs146/bin/new.prm $tempgold $tempoutp
+
+rm -f $tempgold $tempoutp

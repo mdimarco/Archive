@@ -1,0 +1,22 @@
+Final Values:
+
+
+
+Beta feels very low compared to what I expected ... But it appears to be a good accuracy in predicting good from bad
+
+
+Bigram
+
+nll_unoptimized 2880160.74795
+nll_optimized 2876602.51963
+acc 0.922476037664
+alpha 1.61
+beta 0.1
+
+
+Alpha
+
+3249279.32486
+3247469.50013
+0.774986277076
+1.61

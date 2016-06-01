@@ -1,0 +1,23 @@
+
+
+
+There's certainly a bug within here somewhere, but after hours of searching, and office hours of asking, I cannot find anything to fix this. At this point I've actually spent much longer debugging (or attempting to debug) than it took to make a program that trains/translates/evaluates. My probabilities for pairs such as ".","." , "chat","cat" and the like seem to be decently high. My sum over all possible translations of any particular french word in my dumb decoder tau is 1, the same is true for particular english words in my noisy decoder. My unigram smoothed values sum to 1, my bigram smoothed values per word sum to 1. Anyways, as frustrating as this bug(s) were, it was still a really interesting project, and specific feedback would be extremely appreciated.
+
+Originally, any bigram not seen in my bigram_freqs was assigned to be the bigram ("*U*","*U*") and computed as such. I actually had a much better f_score trying this, but it seems that since that ignores unigram frequencies of a potentially known word in the bigram, that it should be fixed. The result of changing this actually took my noisy bigram f_score from .50 to .42 :(
+
+In an attempt to preserve my sanity, I implemented the fscore in 3 separate ways in score.py:
+1. Computing precision as true_positive/(false_positive+true_positive)
+			 recall as true_positive/(true_positive+false_negative)
+	and gaining the f_score around this, resulted in dumb: .592, noisy: .418
+
+2. Computing separate f_scores PER SENTENCE pair, then averaging the f_scores
+	precision/recall computed as correct_translation / len(translated_sentence) and correct_translation / len(correct_sentence) respectively, resulted in dumb: .637, noisy: .51 (this was the best result)
+
+3. Computing precision/recall as correct_translation / len(translated_sentence) and correct_translation / len(correct_sentence) 
+	and aggregating across all sentences, resulted in dumb: .603, noisy: .420 (this is the result I would choose if I had to pick)
+
+My dumb translated text generally looks better to me, mostly because it has less untranslated words (due to the ordering of the training during the EM). 
+
+The dumb decoding had a better f_score than the noisy one
+
+This would imply that the dumb decoder may have a better word - word translation scheme, but I would assume since the noisy decoder takes into account the previous word during translation, it may be better at ordering translated words. The f_score doesn't take into account order of words at all, so it would not be able to tell which mode of decoding is better for aligning. 
